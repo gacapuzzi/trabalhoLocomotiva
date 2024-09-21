@@ -6,7 +6,7 @@
 Este projeto visa criar uma solução de ingestão e processamento de dados para monitorar, em near real-time, a frota de ônibus da cidade de São Paulo. A solução permite a coleta de dados quase em tempo real, processamento e visualização de KPIs relevantes.
 
 ### Arquitetura
-A arquitetura utiliza Apache NiFi para ingestão de dados, MinIO como Data Lake, e Hive e PostgreSQL como camadas de dados para disponibilização de dados transformados (camada Gold). O processamento final visa enriquecer os dados com informações de localização e gerar insights que podem ser consumidos via consultas SQL.
+A arquitetura utiliza Apache NiFi para ingestão de dados, MinIO como Data Lake, e Hive e PostgreSQL como camadas de dados para disponibilização de dados transformados (camada Gold). O processamento final visa enriquecer os dados com informações de localização e gerar insights que podem ser consumidos via consultas SQL dentro do warehouse bem como a visualização de KPIs disponíveis para o time de negócios utilizando a ferramenta do PowerBI.
 
 ---
 
@@ -17,19 +17,21 @@ A arquitetura utiliza Apache NiFi para ingestão de dados, MinIO como Data Lake,
 - **MinIO**: Responsável por armazenar os dados brutos e processados no formato de Data Lake.
 - **Hive**: Utilizado para a criação de tabelas que armazenam dados transformados.
 - **PostgreSQL**: Usado para a camada Gold, onde os dados tratados ficam prontos para análises e consumo.
-- **Metabase**: Ferramenta para visualização e monitoramento de KPIs.
+- **PowerBI**: Ferramenta utiizada para visualização de KPIs e analises/estratégias pertinentes ao negócio.
 
 ### Diagrama de Arquitetura
 - A ingestão de dados começa pela API OLHO VIVO e os dados complementares do GTFS.
-- Apache NiFi processa os dados e armazena no MinIO, que está organizado em três camadas (RAW, Trusted, Business/Gold).
-- Hive e PostgreSQL são usados para realizar consultas e transformar os dados, que podem ser visualizados no Metabase.
+- Apache NiFi processa os dados e armazena no MinIO, que está organizado em três camadas (RAW, Trusted, Gold).
+- Hive e PostgreSQL são usados para realizar consultas e transformar os dados, para que possam ser consumidos via consultas SQL e tenha demais aplicações voltadas para o negócio.
+- PowerBI tem como sua funcionalidade gerar a camada de datavviz para utilização do negócio.
 
 ---
 
 ## 3. Ingestão de Dados com Apache NiFi
 
 ### Descrição
-Apache NiFi foi utilizado para coletar dados da API OLHO VIVO da SPTRANS, que fornece a posição de todos os ônibus em circulação a cada dois minutos. A API GTFS é usada para dados complementares (dados cadastrais e de paradas).
+Apache NiFi foi utilizado para coletar dados da API OLHO VIVO da SPTRANS, que fornece a posição de todos os ônibus em circulação a cada dois minutos. 
+A consumo de dados GTFS é utilizado para dados complementares (dados cadastrais e de paradas).
 
 ### Configurações Importantes
 - **API OLHO VIVO**:
@@ -50,12 +52,12 @@ Apache NiFi foi utilizado para coletar dados da API OLHO VIVO da SPTRANS, que fo
 O MinIO é utilizado como um Data Lake com três camadas de dados:
 1. **RAW**: Contém os dados brutos coletados pelas APIs.
 2. **Trusted**: Contém os dados validados e organizados após o processamento.
-3. **Business/Gold**: Dados tratados, prontos para análise e consumo.
+3. **Gold**: Dados tratados, prontos para análise e consumo.
 
 ### Estrutura de Buckets
 - **/raw**: Dados brutos não processados.
 - **/trusted**: Dados após validação e limpeza.
-- **/business**: Dados prontos para análise.
+- **/gold**: Dados prontos para análise.
 
 **Configuração do MinIO**:
 - Armazenamento no formato de objetos (ex: JSON ou CSV).
